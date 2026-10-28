@@ -19,16 +19,18 @@ What it does, step by step:
 3. Checks the package's SHA-256 against `SHA256SUMS`, and installs nothing if they differ.
 4. Installs the package with apt-get or dnf on Linux, so its dependencies resolve, or with the macOS installer on a Mac. Only this step and the next two run as root, through sudo, which may ask for your password.
 5. Makes sure the HIPS Provider service is running.
-6. Links this computer to your HIPS account: it shows a code and a QR code to approve at [console.hips.com/device](https://console.hips.com/device), and waits until you have approved it. On a Mac it also starts the menu bar app.
+6. Sets how this computer works for HIPS. On Linux it asks: Always, whenever the computer is on (the default, for a server or a dedicated machine), or Auto, only while nobody is using it; with no terminal to ask in, Always. On a Mac, Auto. A computer linked already keeps its mode. Change it later in My GPUs in the HIPS Console, in the app's settings, or with `sudo hips-provider config set availability_mode always` (or `scheduled` for Auto).
+7. Hands over to `hips-provider setup`, which shows the GPUs it found, links this computer to your HIPS account (a code and a QR code to approve at [console.hips.com/device](https://console.hips.com/device), waiting until you have approved it) and says what runs next. On a Mac it also starts the menu bar app.
 
 The script is POSIX sh, so `| sh` works as well. Settings, as environment variables for the shell after the pipe:
 
 ```sh
 curl -fsSL https://hips.com/install.sh | HIPS_VERSION=0.1.5 bash   # install that release instead of the newest
-curl -fsSL https://hips.com/install.sh | HIPS_NO_LINK=1 bash       # install without linking; link later with: sudo hips-provider connect
+curl -fsSL https://hips.com/install.sh | HIPS_MODE=auto bash       # always or auto, without the question
+curl -fsSL https://hips.com/install.sh | HIPS_NO_LINK=1 bash       # install without linking; link later with: sudo hips-provider setup
 ```
 
-It ends with exit code 0 when the app is installed, running and linked (or not linked, as `HIPS_NO_LINK=1` asks), and otherwise says what to do: 1 the computer is not supported, 2 a setting is not valid, 3 a download failed, 4 a download does not match `SHA256SUMS`, 5 the package could not be installed, 6 the service is not running, 7 the computer is not linked yet.
+It ends with exit code 0 when the app is installed, running and linked (or not linked, as `HIPS_NO_LINK=1` asks), and otherwise says what to do: 1 the computer is not supported, 2 a setting is not valid, 3 a download failed, 4 a download does not match `SHA256SUMS`, 5 the package could not be installed, 6 the service is not running, 7 the computer is not linked yet, 8 the computer has no GPU HIPS supports, so it cannot work for HIPS.
 
 ### Read the script first
 
@@ -62,7 +64,7 @@ Download the package for your computer from the [newest release](https://github.
 | Mac with Apple silicon | `sudo installer -pkg HIPS-Provider-mac-arm64.pkg -target /`, or open the package |
 | Windows x64 | Open `HIPS-Provider-windows-x64.msi` |
 
-A test build that is not signed yet asks you to confirm before its package opens on macOS or Windows; the release's notes say how. Then link the computer to your HIPS account: choose Connect this device in the app on macOS and Windows, or run `sudo hips-provider connect` in a terminal.
+A test build that is not signed yet asks you to confirm before its package opens on macOS or Windows; the release's notes say how. Then link the computer to your HIPS account: choose Connect this device in the app on macOS and Windows, or run `sudo hips-provider setup` in a terminal.
 
 ### Uninstall
 
