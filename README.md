@@ -100,6 +100,32 @@ shasum -a 256 -c SHA256SUMS --ignore-missing
 
 On Windows, in PowerShell: `Get-FileHash .\HIPS-Provider-windows-x64.msi -Algorithm SHA256`, and compare it with the line in `SHA256SUMS`.
 
+### Check the signature
+
+From version 0.1.15, each release's `SHA256SUMS` and its `.rpm` packages are signed with the HIPS Provider release key, whose fingerprint is:
+
+```
+6775B6C0C0E1B9A1FBCFBD168ABDB676D4A546F4
+```
+
+Each signed release carries the key's certificate as `hips-provider-release-key.asc` and the signature of `SHA256SUMS` as `SHA256SUMS.sig`. Download both with `SHA256SUMS`, then, in the folder that holds the three files:
+
+```sh
+gpg --show-keys hips-provider-release-key.asc    # the fingerprint must be the one above
+gpg --import hips-provider-release-key.asc
+gpg --verify SHA256SUMS.sig SHA256SUMS
+```
+
+The check prints `Good signature from "HIPS Provider releases <engineering@hips.com>"`. gpg also warns that the key is not certified with a trusted signature: that means you have not certified the key yourself, and the fingerprint check above is what ties it to HIPS. With the signature good, check the download against `SHA256SUMS` as above.
+
+On Fedora 45 and other systems that install only signed packages, give rpm the key before installing a package yourself:
+
+```sh
+sudo rpm --import hips-provider-release-key.asc
+```
+
+The one-line installer does this for you.
+
 ## Help
 
 Questions and support: [hips.com](https://hips.com), or hello@hips.com.
